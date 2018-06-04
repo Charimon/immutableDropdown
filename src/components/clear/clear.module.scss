@@ -1,0 +1,20 @@
+.container {
+  height: 0.5em;
+  width: auto;
+  fill: var(--input-button-color);
+  cursor: pointer;
+  transform: none;
+  transition: all var(--input-animation-time);
+
+  &.focused, &:hover {
+    fill: var(--input-button-focused-color);
+  }
+
+  &.active {
+    fill: var(--input-button-active-color);
+  }
+
+  &:hover {
+    transform: scale(1.3);
+  }
+}

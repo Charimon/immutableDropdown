@@ -1,0 +1,118 @@
+.tetheredElement {
+  z-index: 10001;
+}
+
+.container {
+  background: var(--input-background);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  border: 1px solid var(--input-border-color);
+  border-radius: var(--input-border-radius);
+  box-shadow: 0 0 0 0 transparent;
+  padding: 0.25em 0.5em;
+  box-shadow: 0 0 0 0 var(--input-box-shadow-color);
+  transition: all var(--input-animation-time);
+  
+  margin: 1em;
+
+  &:hover {
+    background: var(--input-hover-background);
+    box-shadow: 0 0 0 2px var(--input-box-shadow-hover-color);
+    border-color: var(--input-border-hover-color);
+
+    .input {
+      background: var(--input-hover-background);
+    }
+  }
+
+  &.focused {
+    background: var(--input-focused-background);
+    border-color: var(--input-border-focused-color);
+    box-shadow: 0 0 0 2px var(--input-box-shadow-focused-color);
+    border-radius: var(--input-border-radius) var(--input-border-radius) 0 0;
+
+    .input {
+      background: var(--input-focused-background);
+    }
+  }
+
+  &.hasInputValue, &.hasValue {
+    .clearButton {
+      height: 0.5em;
+      width: auto;
+    }
+  }
+
+  .input {
+    background: var(--input-background);
+  }
+}
+
+.content {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-grow: 1;
+  min-width: 0;
+  flex-basis: auto;
+  position: relative;
+  margin: -0.2em;
+  flex-wrap: wrap;
+}
+
+.button, .clearButton {
+  margin: 0.5em 0 0.5em 0.375em;
+  flex-shrink: 0;
+}
+.clearButton {
+  height: 0;
+  width: 0;
+}
+
+.input {
+  display: block;
+  background: #fff;
+  border: none;
+  outline: 0;
+  font-size: 1em;
+  padding: 0;
+  margin: 0.2em;
+  min-width: 0;
+  min-height: 1.5em;
+  line-height: 1.5em;
+  flex-grow: 1;
+  flex-basis: 0;
+  color: var(--input-text-color);
+  overflow: hidden;
+  min-width: 10em;
+  transition: all var(--input-animation-time);
+}
+
+.tag {
+  background: var(--input-tag-background);
+  color: var(--input-tag-color);
+  border: 1px solid var(--input-tag-border-color);
+  border-radius: var(--input-border-radius);
+  flex-shrink: 0;
+  flex-grow: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 0.2em;
+  padding: 0.125em 0.25em;
+}
+
+.tagValue {
+  // font-size: 0.75em;
+}
+
+.tagClear {
+  margin-left: 0.25em;
+  // font-size: 0.75em;
+}
+
+@keyframes blink {
+  from, to { opacity: 0; }
+  50% { opacity: 1; }
+}

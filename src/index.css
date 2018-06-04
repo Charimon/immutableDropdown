@@ -1,0 +1,56 @@
+html {
+  --font: sans-serif;
+  --input-animation-time: 300ms;
+/* 
+  --input-button-color: #666;
+  --input-button-focused-color: rgb(255, 182, 182);
+  --input-button-active-color: red;
+
+  --input-border-color: #666;
+  --input-border-focused-color: red;
+  --input-border-hover-color: rgb(255, 182, 182);
+
+  --input-box-shadow-color: transparent;
+  --input-box-shadow-focused-color: rgb(255, 155, 155);
+  --input-box-shadow-hover-color: rgb(252, 218, 218);
+
+
+  --input-dropdown-item-color: #666;
+  --input-dropdown-item-background: #fff;
+  --input-dropdown-item-focused-color: #333;
+  --input-dropdown-item-focused-background: rgb(255, 155, 155);
+
+  --input-border-radius: 0.5em;
+
+  --input-text-color: #222;
+  --input-text-focused-color: #222;
+
+  --input-tag-border-color: #666;
+  --input-tag-background: red;
+  --input-tag-color: #333; */
+}
+
+html, body {
+  padding: 0;
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  height: 100%;
+  visibility: visible;
+  display: grid;
+  grid-auto-columns: 1fr;
+  grid-auto-rows: 1fr;
+  min-height: 100%;
+  grid-auto-flow: column;
+}

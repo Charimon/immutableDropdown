@@ -1,0 +1,31 @@
+.tetheredElement {
+  z-index: 10001;
+}
+
+.container {
+  background: #fff;
+  border: 1px solid var(--input-border-color);
+  border-radius: 0 0 var(--input-border-radius) var(--input-border-radius);
+  margin-top: -1px;
+  transition: all var(--input-animation-time);
+  overflow: auto;
+  position: relative;
+}
+
+.item {
+  padding: 0.25em 0.5em;
+  border-top: 1px solid var(--input-border-color);
+  color: var(--input-dropdown-item-color);
+  background: var(--input-dropdown-item-background);
+  transition: all var(--input-animation-time);
+  cursor: pointer;
+
+  &:first-child {
+    border-top: none;
+  }
+
+  &.focused {
+    color: var(--input-dropdown-item-focused-color);
+    background: var(--input-dropdown-item-focused-background);
+  }
+}
