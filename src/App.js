@@ -7,12 +7,11 @@ import {DropdownInput, DropdownInputMulti } from './components'
 
 class App extends Component {
   state = {
-    data: Map.of('dropdownMulti', List.of(
-    ))
+    data: Map.of('dropdownMulti', List.of())
   }
-  optionTransformFromInputValue = (inputValue) => {
-    return Map.of('label', inputValue, 'count', 100)
-  }
+  optionTransformFromInputValue = (inputValue) => Map.of('label', inputValue, 'count', 100)
+  optionToValueTransform = (option) => option.get('label')
+
   optionRender = ({data, focused, optionDisplayKey, ...props}) => {
     const className = [
       styles.item,
@@ -26,9 +25,8 @@ class App extends Component {
     </div>
   }
 
-  onUpdate = (data) => {
-    this.setState(state => ({...state, data}))
-  }
+  onUpdate = (data) => this.setState(state => ({...state, data}))
+  optionIsEqualToValue = (option, value, {optionFilterKey}) => option?.get(optionFilterKey) === value;
 
   render() {
     const options = List.of(
@@ -47,14 +45,14 @@ class App extends Component {
       <div className={styles.container}>
         <DropdownInput placeholder="placeholder" autoFocus
           optionDisplayKey='label'
-          valueDisplayKey='label'
           optionFilterKey='label'
           optionRender={this.optionRender}
           onUpdate={this.onUpdate}
           data={this.state.data}
           name='dropdown'
           options={options}
-          firstOptionTransformFromInputValue={this.optionTransformFromInputValue} />
+          firstOptionTransformFromInputValue={this.optionTransformFromInputValue}
+          optionToValueTransform={this.optionToValueTransform} />
         <DropdownInputMulti placeholder="multi" autoFocus
           optionDisplayKey='label'
           valueDisplayKey='label'
@@ -64,7 +62,9 @@ class App extends Component {
           data={this.state.data}
           name='dropdownMulti'
           options={options}
-          firstOptionTransformFromInputValue={this.optionTransformFromInputValue} />
+          firstOptionTransformFromInputValue={this.optionTransformFromInputValue}
+          optionToValueTransform={this.optionToValueTransform}
+          optionIsEqualToValue={this.optionIsEqualToValue} />
       </div>
     );
   }

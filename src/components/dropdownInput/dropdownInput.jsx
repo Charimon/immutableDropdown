@@ -79,12 +79,18 @@ export class DropdownInput extends _Input {
     }
   }
 
+  optionToValueTransform = (option) => {
+    if(this.props.optionToValueTransform) return this.props.optionToValueTransform(option);
+    else return option;
+  }
+
   onSelectOption = (option) => {
+    const value = this.optionToValueTransform(option);
     if(this.props.name != null) {
-      const newData = (this.props.data || Map())?.setIn(this.props.name.split('.'), option);
+      const newData = (this.props.data || Map())?.setIn(this.props.name.split('.'), value);
       this.props.onUpdate?.(newData);
     } else {
-      this.props.onUpdate?.(option);
+      this.props.onUpdate?.(value);
     }
     this.setState(state => ({...state, inputValue: null}))
   }
@@ -224,6 +230,7 @@ export class DropdownInput extends _Input {
     valueRender: PropTypes.func,
     filterOption: PropTypes.func,
     onUpdate: PropTypes.func,
+    optionToValueTransform: PropTypes.func,
     noOptionTransformFromInputValue: PropTypes.func,
     firstOptionTransformFromInputValue: PropTypes.func,
     lastOptionTransformFromInputValue: PropTypes.func,

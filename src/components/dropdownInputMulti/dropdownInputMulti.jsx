@@ -94,18 +94,24 @@ export class DropdownInputMulti extends _Input {
     } 
   }
 
+  optionToValueTransform = (option) => {
+    if(this.props.optionToValueTransform) return this.props.optionToValueTransform(option);
+    else return option;
+  }
+
   onSelectOption = (optionToAdd) => {
+    const valueToAdd = this.optionToValueTransform(optionToAdd);
     if(this.props.name != null) {
       const newData = (this.props.data || Map())?.updateIn(this.props.name.split('.'), (data) => {
         return (data || List())
-          .filter(option => !DropdownInputMulti.optionsIsEqual(this.props, option, optionToAdd))
-          .push(optionToAdd);
+          .filter(value => !DropdownInputMulti.valueIsEqualToValue(this.props, value, valueToAdd))
+          .push(valueToAdd);
       });
       this.props.onUpdate?.(newData);
     } else {
       this.props.onUpdate?.( (this.props.data || List())
-        .filter(option => !DropdownInputMulti.optionsIsEqual(this.props, option, optionToAdd))
-        .push(optionToAdd))
+        .filter(value => !DropdownInputMulti.valueIsEqualToValue(this.props, value, valueToAdd))
+        .push(valueToAdd))
     }
     this.setState(state => ({...state, inputValue: null}))
   }
@@ -137,16 +143,16 @@ export class DropdownInputMulti extends _Input {
     </div>
   }
 
-  onDeleteTag = (optionToDelete) => () => {
+  onDeleteTag = (valueToDelete) => () => {
     if(this.props.name != null) {
       const newData = (this.props.data || Map())?.updateIn(this.props.name.split('.'), (data) => {
         return (data || List())
-          .filter(option => !DropdownInputMulti.optionsIsEqual(this.props, option, optionToDelete))
+          .filter(option => !DropdownInputMulti.optionIsEqualToValue(this.props, option, valueToDelete))
       });
       this.props.onUpdate?.(newData);
     } else {
       this.props.onUpdate?.( (this.props.data || List())
-        .filter(option => !DropdownInputMulti.optionsIsEqual(this.props, option, optionToDelete)));
+        .filter(option => !DropdownInputMulti.optionIsEqualToValue(this.props, option, valueToDelete)));
     }
     this.setState(state => ({...state, inputValue: null}))
   }
@@ -211,14 +217,41 @@ export class DropdownInputMulti extends _Input {
 
   static optionsIsEqual = (props, option1, option2) => {
     if(props.optionsIsEqual)
-      return props.optionsIsEqual(option1, option2, {optionFilterKey: props.optionFilterKey})
-    else if(option1?.get && option2?.get && props.optionFilterKey != null)
-      return option1.get(props.optionFilterKey) === option2.get(props.optionFilterKey)
-    else return option1 === option2;
+      return props.optionsIsEqual(option1, option2, {optionFilterKey: props.optionFilterKey, filterCaseSensitive: props.filterCaseSensitive})
+    else if(option1?.get && option2?.get && props.optionFilterKey != null) {
+      if(props.filterCaseSensitive) return option1.get(props.optionFilterKey) === option2.get(props.optionFilterKey)
+      else return option1.get(props.optionFilterKey)?.toLowerCase?.() === option2.get(props.optionFilterKey)?.toLowerCase?.()
+    } else {
+      if(props.filterCaseSensitive) return option1 === option2;
+      else return option1?.toLowerCase?.() === option2?.toLowerCase?.();
+    }
+  }
+
+  static optionIsEqualToValue = (props, option, value) => {
+    if(props.optionIsEqualToValue)
+      return props.optionIsEqualToValue(option, value, {optionFilterKey: props.optionFilterKey, filterCaseSensitive: props.filterCaseSensitive})
+    else return DropdownInputMulti.optionsIsEqual(props, option, value)
+  }
+
+  static valueIsEqualToValue = (props, value1, value2) => {
+    if(props.valueIsEqualToValue)
+      return props.valueIsEqualToValue(value1, value2, {valueDisplayKey: props.valueDisplayKey, filterCaseSensitive: props.filterCaseSensitive})
+    else if(value1?.get && value2?.get && props.valueDisplayKey != null) {
+      if(props.filterCaseSensitive) return value1.get(props.valueDisplayKey) === value2.get(props.valueDisplayKey)
+      else return value1.get(props.valueDisplayKey)?.toLowerCase?.() === value2.get(props.valueDisplayKey)?.toLowerCase?.()
+    }
+    else {
+      if(props.filterCaseSensitive) return value1 === value2;
+      else return value1?.toLowerCase?.() === value2?.toLowerCase?.();
+    }
   }
 
   static getValues = (props) => {
-    return (props.data || Map())?.getIn(props.name.split('.'));
+    if(props.name != null) {
+      return (props.data || Map())?.getIn(props.name.split('.'));
+    } else {
+      return (props.data || List())
+    }
   }
 
   static getValue = (props, option) => {
@@ -234,7 +267,7 @@ export class DropdownInputMulti extends _Input {
     let lastOption = props.lastOptionTransformFromInputValue?.(state.inputValue);
 
     let filteredOptions = props.options?.filter(option => {
-      const containsOption = values?.find(value => DropdownInputMulti.optionsIsEqual(props, option, value)) != null;
+      const containsOption = values?.find(value => DropdownInputMulti.optionIsEqualToValue(props, option, value)) != null;
 
       /*sideeffect*/
       if( DropdownInputMulti.optionsIsEqual(props, firstOption, option) ) firstOption = null;
@@ -288,12 +321,13 @@ export class DropdownInputMulti extends _Input {
     noOptionTransformFromInputValue: PropTypes.func,
     firstOptionTransformFromInputValue: PropTypes.func,
     lastOptionTransformFromInputValue: PropTypes.func,
+    optionIsEqualToValue: PropTypes.func,
 
     optionDisplayKey: PropTypes.string,
     optionFilterKey: PropTypes.string,
     valueDisplayKey: PropTypes.string,
 
-    data: PropTypes.oneOfType([PropTypes.instanceOf(Map), PropTypes.string]),
+    data: PropTypes.oneOfType([PropTypes.instanceOf(Map), PropTypes.instanceOf(List), PropTypes.string]),
     name: PropTypes.string,
     maxHeight: PropTypes.number,
     filterCaseSensitive: PropTypes.bool,

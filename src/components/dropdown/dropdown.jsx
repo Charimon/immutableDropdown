@@ -113,8 +113,6 @@ export class Dropdown extends React.Component {
     const showNoOptionsItem = this.props.options?.count() === 0 && this.props.noOptionOption;
     const isNoOptionFocused = this.props.noOptionOption === this.props.focusedOption;
 
-    console.log(this.props.showFirstOption, this.props.showLastOption)
-
     return <div className={styles.container} style={style}>
       {this.props.options?.map((option, key) => {
         const focused = option === this.props.focusedOption;
