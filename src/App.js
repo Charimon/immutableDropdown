@@ -3,8 +3,7 @@ import {Map, List} from 'immutable';
 
 import styles from './App.module.scss';
 
-import {DropdownInput } from './components/dropdownInput/dropdownInput.jsx'
-import {DropdownInputMulti } from './components/dropdownInputMulti/dropdownInputMulti.jsx'
+import {DropdownInput, DropdownInputMulti } from './components'
 
 class App extends Component {
   state = {

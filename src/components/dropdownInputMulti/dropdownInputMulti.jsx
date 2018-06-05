@@ -202,8 +202,8 @@ export class DropdownInputMulti extends _Input {
         optionDisplayKey={this.props.optionDisplayKey}
         width={this.state.elmWidth}
         noOptionOption={noOptionOption}
-        showFirstOption={hasInputValue && this.props.firstOptionTransformFromInputValue != null}
-        showLastOption={hasInputValue && this.props.lastOptionTransformFromInputValue != null}
+        showFirstOption={hasInputValue && this.state.firstOption != null}
+        showLastOption={hasInputValue && this.state.lastOption != null}
         style={style} />}
 
     </TetherComponent>
@@ -230,8 +230,15 @@ export class DropdownInputMulti extends _Input {
     const values = DropdownInputMulti.getValues(props);
     const inputValue = state.inputValue?.toLowerCase();
 
+    let firstOption = props.firstOptionTransformFromInputValue?.(state.inputValue);
+    let lastOption = props.lastOptionTransformFromInputValue?.(state.inputValue);
+
     let filteredOptions = props.options?.filter(option => {
       const containsOption = values?.find(value => DropdownInputMulti.optionsIsEqual(props, option, value)) != null;
+
+      /*sideeffect*/
+      if( DropdownInputMulti.optionsIsEqual(props, firstOption, option) ) firstOption = null;
+      if( DropdownInputMulti.optionsIsEqual(props, lastOption, option) ) lastOption = null;
       
       if(containsOption === true) return false;
       else if(state.inputValue == null) return true;
@@ -252,11 +259,11 @@ export class DropdownInputMulti extends _Input {
       else return true;
     });
     
-    if(props.firstOptionTransformFromInputValue && (state.inputValue || "").length > 0 ) {
-      filteredOptions = filteredOptions.unshift(props.firstOptionTransformFromInputValue?.(state.inputValue))
+    if(props.firstOptionTransformFromInputValue && (state.inputValue || "").length > 0 && firstOption != null) {
+      filteredOptions = filteredOptions.unshift(firstOption);
     }
-    if(props.lastOptionTransformFromInputValue && (state.inputValue || "").length > 0) {
-      filteredOptions = filteredOptions.push(props.lastOptionTransformFromInputValue?.(state.inputValue))
+    if(props.lastOptionTransformFromInputValue && (state.inputValue || "").length > 0 && lastOption != null) {
+      filteredOptions = filteredOptions.push(lastOption);
     }
 
     let focusedOptionIndex = filteredOptions?.findIndex(option =>
@@ -269,7 +276,7 @@ export class DropdownInputMulti extends _Input {
       focusedOption = props.noOptionTransformFromInputValue?.(state.inputValue)
     }
 
-    return { filteredOptions, focusedOptionIndex, focusedOption };
+    return { filteredOptions, focusedOptionIndex, focusedOption, firstOption, lastOption };
   }
 
   static propTypes = { 
