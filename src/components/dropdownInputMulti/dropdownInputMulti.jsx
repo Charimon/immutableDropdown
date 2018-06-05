@@ -18,7 +18,7 @@ export class DropdownInputMulti extends _Input {
   }
 
   componentDidMount = () =>  { this.updateSize(); }
-  componentDidUpdate = (prevProps, prevState) => { this.updateSize(); }
+  componentDidUpdate = () => { this.updateSize(); }
 
   updateSize = () => {
     const elmWidth = this.elm?.current?.clientWidth;
@@ -33,7 +33,7 @@ export class DropdownInputMulti extends _Input {
     this.setState(state => ({...state, focusedOptionIndex, focusedOption}))
   }
   
-  onFocus = (e) => {
+  onFocus = () => {
     const focusedOptionIndex = 0;
     let focusedOption = this.state.filteredOptions?.get(focusedOptionIndex);
     if(this.props.noOptionTransformFromInputValue != null && this.state.filteredOptions?.count() === 0) {
@@ -42,7 +42,7 @@ export class DropdownInputMulti extends _Input {
     this.setState(state => ({...state, focusedOptionIndex, focusedOption, showDropdown: true}))
   }
 
-  onBlur = (e) => {
+  onBlur = () => {
     this.setState(state => ({...state, focusedOptionIndex: null, focusedOption: null, showDropdown: false}))
   }
 
@@ -107,7 +107,7 @@ export class DropdownInputMulti extends _Input {
         .filter(option => !DropdownInputMulti.optionsIsEqual(this.props, option, optionToAdd))
         .push(optionToAdd))
     }
-    this.setState(state => ({inputValue: null}))
+    this.setState(state => ({...state, inputValue: null}))
   }
 
   onInputChange = (e) => {
@@ -137,7 +137,7 @@ export class DropdownInputMulti extends _Input {
     </div>
   }
 
-  onDeleteTag = (optionToDelete) => (e) => {
+  onDeleteTag = (optionToDelete) => () => {
     if(this.props.name != null) {
       const newData = (this.props.data || Map())?.updateIn(this.props.name.split('.'), (data) => {
         return (data || List())
@@ -148,12 +148,10 @@ export class DropdownInputMulti extends _Input {
       this.props.onUpdate?.( (this.props.data || List())
         .filter(option => !DropdownInputMulti.optionsIsEqual(this.props, option, optionToDelete)));
     }
-    this.setState(state => ({inputValue: null}))
+    this.setState(state => ({...state, inputValue: null}))
   }
 
-  onClearClick = (e) => {
-    this.onSelectOption(undefined)
-  }
+  onClearClick = () => { this.onSelectOption(undefined); }
 
   render() {
     const hasValue = this.hasValue();
@@ -204,6 +202,8 @@ export class DropdownInputMulti extends _Input {
         optionDisplayKey={this.props.optionDisplayKey}
         width={this.state.elmWidth}
         noOptionOption={noOptionOption}
+        showFirstOption={hasInputValue && this.props.firstOptionTransformFromInputValue != null}
+        showLastOption={hasInputValue && this.props.lastOptionTransformFromInputValue != null}
         style={style} />}
 
     </TetherComponent>
@@ -230,7 +230,7 @@ export class DropdownInputMulti extends _Input {
     const values = DropdownInputMulti.getValues(props);
     const inputValue = state.inputValue?.toLowerCase();
 
-    const filteredOptions = props.options?.filter(option => {
+    let filteredOptions = props.options?.filter(option => {
       const containsOption = values?.find(value => DropdownInputMulti.optionsIsEqual(props, option, value)) != null;
       
       if(containsOption === true) return false;
@@ -251,6 +251,13 @@ export class DropdownInputMulti extends _Input {
       }
       else return true;
     });
+    
+    if(props.firstOptionTransformFromInputValue && (state.inputValue || "").length > 0 ) {
+      filteredOptions = filteredOptions.unshift(props.firstOptionTransformFromInputValue?.(state.inputValue))
+    }
+    if(props.lastOptionTransformFromInputValue && (state.inputValue || "").length > 0) {
+      filteredOptions = filteredOptions.push(props.lastOptionTransformFromInputValue?.(state.inputValue))
+    }
 
     let focusedOptionIndex = filteredOptions?.findIndex(option =>
       DropdownInputMulti.optionsIsEqual(props, option, state.focusedOption)
@@ -272,6 +279,8 @@ export class DropdownInputMulti extends _Input {
     filterOption: PropTypes.func,
     onUpdate: PropTypes.func,
     noOptionTransformFromInputValue: PropTypes.func,
+    firstOptionTransformFromInputValue: PropTypes.func,
+    lastOptionTransformFromInputValue: PropTypes.func,
 
     optionDisplayKey: PropTypes.string,
     optionFilterKey: PropTypes.string,

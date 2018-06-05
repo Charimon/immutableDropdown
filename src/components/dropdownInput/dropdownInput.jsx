@@ -18,7 +18,7 @@ export class DropdownInput extends _Input {
   }
 
   componentDidMount = () =>  { this.updateSize(); }
-  componentDidUpdate = (prevProps, prevState) => { this.updateSize(); }
+  componentDidUpdate = () => { this.updateSize(); }
 
   updateSize = () => {
     const elmWidth = this.elm?.current?.clientWidth;
@@ -33,7 +33,7 @@ export class DropdownInput extends _Input {
     this.setState(state => ({...state, focusedOptionIndex, focusedOption}))
   }
   
-  onFocus = (e) => {
+  onFocus = () => {
     const focusedOptionIndex = 0;
     let focusedOption = this.state.filteredOptions?.get(focusedOptionIndex);
     if(this.props.noOptionTransformFromInputValue != null && this.state.filteredOptions?.count() === 0) {
@@ -42,7 +42,7 @@ export class DropdownInput extends _Input {
     this.setState(state => ({...state, focusedOptionIndex, focusedOption, showDropdown: true}))
   }
 
-  onBlur = (e) => {
+  onBlur = () => {
     this.setState(state => ({...state, focusedOptionIndex: null, focusedOption: null, showDropdown: false}))
   }
 
@@ -86,7 +86,7 @@ export class DropdownInput extends _Input {
     } else {
       this.props.onUpdate?.(option);
     }
-    this.setState(state => ({inputValue: null}))
+    this.setState(state => ({...state, inputValue: null}))
   }
 
   onInputChange = (e) => {
@@ -106,9 +106,7 @@ export class DropdownInput extends _Input {
     return <div className={styles.value}>{value}</div>
   }
 
-  onClearClick = (e) => {
-    this.onSelectOption(undefined)
-  }
+  onClearClick = () => { this.onSelectOption(undefined); }
 
   render() {
     const hasValue = this.hasValue();
@@ -159,6 +157,8 @@ export class DropdownInput extends _Input {
         optionDisplayKey={this.props.optionDisplayKey}
         width={this.state.elmWidth}
         noOptionOption={noOptionOption}
+        showFirstOption={hasInputValue && this.props.firstOptionTransformFromInputValue != null}
+        showLastOption={hasInputValue && this.props.lastOptionTransformFromInputValue != null}
         style={style} />}
 
     </TetherComponent>
@@ -181,7 +181,7 @@ export class DropdownInput extends _Input {
   static getDerivedStateFromProps = (props, state) => {
     const inputValue = state.inputValue?.toLowerCase();
     
-    const filteredOptions = props.options?.filter(option => {
+    let filteredOptions = props.options?.filter(option => {
       if(state.inputValue == null)
         return true;
       else if(props.filterOption)
@@ -197,6 +197,13 @@ export class DropdownInput extends _Input {
       }
       else return true;
     });
+
+    if(props.firstOptionTransformFromInputValue && state.inputValue != null) {
+      filteredOptions = filteredOptions.unshift(props.firstOptionTransformFromInputValue?.(state.inputValue))
+    }
+    if(props.lastOptionTransformFromInputValue && state.inputValue != null) {
+      filteredOptions = filteredOptions.push(props.lastOptionTransformFromInputValue?.(state.inputValue))
+    }
 
     let focusedOptionIndex = filteredOptions?.findIndex(option =>
       DropdownInput.optionsIsEqual(props, option, state.focusedOption)
@@ -218,6 +225,8 @@ export class DropdownInput extends _Input {
     filterOption: PropTypes.func,
     onUpdate: PropTypes.func,
     noOptionTransformFromInputValue: PropTypes.func,
+    firstOptionTransformFromInputValue: PropTypes.func,
+    lastOptionTransformFromInputValue: PropTypes.func,
 
     optionDisplayKey: PropTypes.string,
     optionFilterKey: PropTypes.string,

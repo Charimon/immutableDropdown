@@ -98,7 +98,7 @@ export class Dropdown extends React.Component {
     this.props.onFocusOption?.(focusedOptionIndex, focusedOption);
   }
 
-  componentDidUpdate = (prevProps, prevState) => {
+  componentDidUpdate = (prevProps) => {
     if(prevProps.focusedOptionIndex !== this.props.focusedOptionIndex) {
       this.focusedElm?.current?.scrollIntoView?.();
     }
@@ -113,10 +113,18 @@ export class Dropdown extends React.Component {
     const showNoOptionsItem = this.props.options?.count() === 0 && this.props.noOptionOption;
     const isNoOptionFocused = this.props.noOptionOption === this.props.focusedOption;
 
+    console.log(this.props.showFirstOption, this.props.showLastOption)
+
     return <div className={styles.container} style={style}>
       {this.props.options?.map((option, key) => {
         const focused = option === this.props.focusedOption;
-        return <DropdownItem key={key}
+        let Tag = DropdownItem;
+        if(this.props.showFirstOption && key === 0)
+          Tag = DropdownAddItem;
+        if(this.props.showLastOption && key === this.props.options.count() - 1)
+          Tag = DropdownAddItem;
+
+        return <Tag key={key}
           data={option}
           optionDisplayKey={this.props.optionDisplayKey}
           focused={focused}
@@ -149,5 +157,7 @@ export class Dropdown extends React.Component {
     focusedOptionIndex: PropTypes.number,
     maxHeight: PropTypes.number,
     optionDisplayKey: PropTypes.string,
+    showFirstOption: PropTypes.bool,
+    showLastOption: PropTypes.bool,
   }
 }

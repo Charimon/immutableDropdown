@@ -98,7 +98,7 @@
   flex-basis: 0;
   color: var(--input-text-color);
   overflow: hidden;
-  transition: all var(--input-animation-time);
+  transition: all var(--input-animation-time), width 0s, flex-grow 0s;
 }
 
 .cursor {

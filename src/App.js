@@ -11,7 +11,7 @@ class App extends Component {
     data: Map.of('dropdownMulti', List.of(
     ))
   }
-  noOptionTransformFromInputValue = (inputValue) => {
+  optionTransformFromInputValue = (inputValue) => {
     return Map.of('label', inputValue, 'count', 100)
   }
   optionRender = ({data, focused, optionDisplayKey, ...props}) => {
@@ -55,7 +55,7 @@ class App extends Component {
           data={this.state.data}
           name='dropdown'
           options={options}
-          noOptionTransformFromInputValue={this.noOptionTransformFromInputValue} />
+          firstOptionTransformFromInputValue={this.optionTransformFromInputValue} />
         <DropdownInputMulti placeholder="multi" autoFocus
           optionDisplayKey='label'
           valueDisplayKey='label'
@@ -65,7 +65,7 @@ class App extends Component {
           data={this.state.data}
           name='dropdownMulti'
           options={options}
-          noOptionTransformFromInputValue={this.noOptionTransformFromInputValue} />
+          firstOptionTransformFromInputValue={this.optionTransformFromInputValue} />
       </div>
     );
   }
