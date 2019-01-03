@@ -26,7 +26,7 @@ class App extends Component {
   }
 
   onUpdate = (data) => this.setState(state => ({...state, data}))
-  optionIsEqualToValue = (option, value, {optionFilterKey}) => option?.get(optionFilterKey) === value;
+  optionIsEqualToValue = (option, value, {optionFilterKey}) => (option != null && option.get(optionFilterKey)) === value;
 
   render() {
     const options = List.of(

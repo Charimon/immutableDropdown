@@ -146,15 +146,17 @@ export class DropdownInputMulti extends _Input {
   }
 
   onDeleteTag = (valueToDelete) => () => {
-    if(this.props.name != null) {
-      const newData = (this.props.data || Map()).updateIn(this.props.name.split('.'), (data) => {
-        return (data || List())
-          .filter(option => !DropdownInputMulti.optionIsEqualToValue(this.props, option, valueToDelete))
-      });
-      this.props.onUpdate?.(newData);
-    } else {
-      this.props.onUpdate?.( (this.props.data || List())
-        .filter(option => !DropdownInputMulti.optionIsEqualToValue(this.props, option, valueToDelete)));
+    if(this.props.onUpdate) {
+      if(this.props.name != null) {
+        const newData = (this.props.data || Map()).updateIn(this.props.name.split('.'), (data) => {
+          return (data || List())
+            .filter(option => !DropdownInputMulti.optionIsEqualToValue(this.props, option, valueToDelete))
+        });
+        this.props.onUpdate(newData);
+      } else {
+        this.props.onUpdate( (this.props.data || List())
+          .filter(option => !DropdownInputMulti.optionIsEqualToValue(this.props, option, valueToDelete)));
+      }
     }
     this.setState(state => ({...state, inputValue: null}))
   }
@@ -163,7 +165,7 @@ export class DropdownInputMulti extends _Input {
 
   render() {
     const hasValue = this.hasValue();
-    const hasInputValue = this.state.inputValue?.length > 0;
+    const hasInputValue = (this.state.inputValue && this.state.inputValue.length) > 0;
     const showDropdown = this.state.showDropdown;
     const noOptionOption = hasInputValue ? this.state.focusedOption : null;
 
@@ -220,12 +222,14 @@ export class DropdownInputMulti extends _Input {
   static optionsIsEqual = (props, option1, option2) => {
     if(props.optionsIsEqual)
       return props.optionsIsEqual(option1, option2, {optionFilterKey: props.optionFilterKey, filterCaseSensitive: props.filterCaseSensitive})
-    else if(option1?.get && option2?.get && props.optionFilterKey != null) {
-      if(props.filterCaseSensitive) return option1.get(props.optionFilterKey) === option2.get(props.optionFilterKey)
-      else return option1.get(props.optionFilterKey)?.toLowerCase?.() === option2.get(props.optionFilterKey)?.toLowerCase?.()
+    else if(option1 && option1.get && option2 && option2.get && props.optionFilterKey != null) {
+      const filteredOption1 = option1.get(props.optionFilterKey)
+      const filteredOption2 = option2.get(props.optionFilterKey)
+      if(props.filterCaseSensitive) return filteredOption1 === filteredOption2
+      else return (filteredOption1 && filteredOption1.toLowerCase && filteredOption1.toLowerCase()) === (filteredOption2 && filteredOption2.toLowerCase && filteredOption2.toLowerCase())
     } else {
       if(props.filterCaseSensitive) return option1 === option2;
-      else return option1?.toLowerCase?.() === option2?.toLowerCase?.();
+      else return (option1 && option1.toLowerCase && option1.toLowerCase()) === (option2 && option2.toLowerCase && option2.toLowerCase());
     }
   }
 
@@ -238,38 +242,40 @@ export class DropdownInputMulti extends _Input {
   static valueIsEqualToValue = (props, value1, value2) => {
     if(props.valueIsEqualToValue)
       return props.valueIsEqualToValue(value1, value2, {valueDisplayKey: props.valueDisplayKey, filterCaseSensitive: props.filterCaseSensitive})
-    else if(value1?.get && value2?.get && props.valueDisplayKey != null) {
-      if(props.filterCaseSensitive) return value1.get(props.valueDisplayKey) === value2.get(props.valueDisplayKey)
-      else return value1.get(props.valueDisplayKey)?.toLowerCase?.() === value2.get(props.valueDisplayKey)?.toLowerCase?.()
+    else if(value1 && value1.get && value2 && value2.get && props.valueDisplayKey != null) {
+      const filteredValue1 = value1.get(props.valueDisplayKey)
+      const filteredValue2 = value2.get(props.valueDisplayKey)
+      if(props.filterCaseSensitive) return filteredValue1 === filteredValue2;
+      else return (filteredValue1 && filteredValue1.toLowerCase && filteredValue1.toLowerCase()) === (filteredValue2 && filteredValue2.toLowerCase && filteredValue2.toLowerCase())
     }
     else {
       if(props.filterCaseSensitive) return value1 === value2;
-      else return value1?.toLowerCase?.() === value2?.toLowerCase?.();
+      else return (value1 && value1.toLowerCase && value1.toLowerCase()) === (value2 && value2.toLowerCase && value2.toLowerCase());
     }
   }
 
   static getValues = (props) => {
     if(props.name != null) {
-      return (props.data || Map())?.getIn(props.name.split('.'));
+      return (props.data || Map()).getIn(props.name.split('.'));
     } else {
       return (props.data || List())
     }
   }
 
   static getValue = (props, option) => {
-    if(option?.get && props.valueDisplayKey != null) return option.get(props.valueDisplayKey);
+    if(option != null&& option.get && props.valueDisplayKey != null) return option.get(props.valueDisplayKey);
     else return option;
   }
 
   static getDerivedStateFromProps = (props, state) => {
     const values = DropdownInputMulti.getValues(props);
-    const inputValue = state.inputValue?.toLowerCase();
+    const inputValue = state.inputValue && state.inputValue.toLowerCase();
 
-    let firstOption = props.firstOptionTransformFromInputValue?.(state.inputValue);
-    let lastOption = props.lastOptionTransformFromInputValue?.(state.inputValue);
+    let firstOption = props.firstOptionTransformFromInputValue && props.firstOptionTransformFromInputValue(state.inputValue);
+    let lastOption = props.lastOptionTransformFromInputValue && props.lastOptionTransformFromInputValue(state.inputValue);
 
-    let filteredOptions = props.options?.filter(option => {
-      const containsOption = values?.find(value => DropdownInputMulti.optionIsEqualToValue(props, option, value)) != null;
+    let filteredOptions = props.options && props.options.filter(option => {
+      const containsOption = values && values.find(value => DropdownInputMulti.optionIsEqualToValue(props, option, value)) != null;
 
       /*sideeffect*/
       if( DropdownInputMulti.optionsIsEqual(props, firstOption, option) ) firstOption = null;
@@ -285,11 +291,12 @@ export class DropdownInputMulti extends _Input {
           inputValue: state.inputValue,
           optionFilterKey: props.optionFilterKey
         })
-      else if(option?.get && props.optionFilterKey != null) {
+      else if(option != null && option.get && props.optionFilterKey != null) {
+        const filteredOption = option.get(props.optionFilterKey);
         if(props.filterCaseSensitive)
-          return option.get(props.optionFilterKey)?.indexOf(state.inputValue) >= 0;
+          return filteredOption && filteredOption.indexOf(state.inputValue) >= 0;
         else
-          return option.get(props.optionFilterKey)?.toLowerCase()?.indexOf(inputValue) >= 0;
+          return filteredOption && filteredOption.toLowerCase().indexOf(inputValue) >= 0;
       }
       else return true;
     });
@@ -301,14 +308,14 @@ export class DropdownInputMulti extends _Input {
       filteredOptions = filteredOptions.push(lastOption);
     }
 
-    let focusedOptionIndex = filteredOptions?.findIndex(option =>
+    let focusedOptionIndex = filteredOptions != null && filteredOptions.findIndex(option =>
       DropdownInputMulti.optionsIsEqual(props, option, state.focusedOption)
     );
-    let focusedOption = (focusedOptionIndex != null) ? filteredOptions?.get(focusedOptionIndex) : null
+    let focusedOption = (focusedOptionIndex != null) ? (filteredOptions && filteredOptions.get(focusedOptionIndex)) : null
 
-    if(filteredOptions?.count() === 0 && props.noOptionTransformFromInputValue != null) {
+    if((filteredOptions && filteredOptions.count()) === 0 && props.noOptionTransformFromInputValue != null) {
       focusedOptionIndex = 0;
-      focusedOption = props.noOptionTransformFromInputValue?.(state.inputValue)
+      focusedOption = props.noOptionTransformFromInputValue && props.noOptionTransformFromInputValue(state.inputValue)
     }
 
     return { filteredOptions, focusedOptionIndex, focusedOption, firstOption, lastOption };

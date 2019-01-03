@@ -49,6 +49,7 @@ export class _Input extends React.Component{
       '--input-tag-border-color': tagBorderColor.toString(),
       '--input-tag-background': tagBackgroundColor.toString(),
       '--input-tag-color': tagTextColor.toString(),
+      '--input-animation-time': '300ms',
     }
   }
 
