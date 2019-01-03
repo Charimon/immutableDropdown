@@ -21,8 +21,8 @@ export class DropdownInputMulti extends _Input {
   componentDidUpdate = () => { this.updateSize(); }
 
   updateSize = () => {
-    const elmWidth = this.elm?.current?.clientWidth;
-    const elmHeight = this.elm?.current?.clientHeight;
+    const elmWidth = this.elm && this.elm.current && this.elm.current.clientWidth;
+    const elmHeight = this.elm && this.elm.current && this.elm.current.clientHeight;
 
     if(this.state.elmWidth !== elmWidth || this.state.elmHeight !== elmHeight) {
       this.setState(state => ({...state, elmWidth, elmHeight}))
@@ -35,9 +35,9 @@ export class DropdownInputMulti extends _Input {
   
   onFocus = () => {
     const focusedOptionIndex = 0;
-    let focusedOption = this.state.filteredOptions?.get(focusedOptionIndex);
-    if(this.props.noOptionTransformFromInputValue != null && this.state.filteredOptions?.count() === 0) {
-      focusedOption = this.props.noOptionTransformFromInputValue?.(this.state.inputValue)
+    let focusedOption = this.state.filteredOptions != null && this.state.filteredOptions.get(focusedOptionIndex);
+    if(this.props.noOptionTransformFromInputValue != null && this.state.filteredOptions != null &&  this.state.filteredOptions.count() === 0) {
+      focusedOption = this.props.noOptionTransformFromInputValue != null && this.props.noOptionTransformFromInputValue(this.state.inputValue)
     }
     this.setState(state => ({...state, focusedOptionIndex, focusedOption, showDropdown: true}))
   }
@@ -52,9 +52,9 @@ export class DropdownInputMulti extends _Input {
         e.preventDefault();
         this.onSelectOption(this.state.focusedOption);
         this.setState(state => {
-          const optionsCount = this.state.filteredOptions?.count() || 0;
+          const optionsCount = (this.state.filteredOptions != null && this.state.filteredOptions.count()) || 0;
           const focusedOptionIndex = (state.focusedOptionIndex + 1 + optionsCount) % optionsCount;
-          const focusedOption = this.state.filteredOptions?.get(focusedOptionIndex);
+          const focusedOption = this.state.filteredOptions != null && this.state.filteredOptions.get(focusedOptionIndex);
           return {...state, focusedOptionIndex, focusedOption}
         })
         if(this.props.blurOnAddValue) e.target.blur();
@@ -66,17 +66,17 @@ export class DropdownInputMulti extends _Input {
     if(e.key === "ArrowDown") {
       e.preventDefault();
       this.setState(state => {
-        const optionsCount = this.state.filteredOptions?.count() || 0;
+        const optionsCount = (this.state.filteredOptions != null && this.state.filteredOptions.count()) || 0;
         const focusedOptionIndex = (state.focusedOptionIndex + 1 + optionsCount) % optionsCount;
-        const focusedOption = this.state.filteredOptions?.get(focusedOptionIndex);
+        const focusedOption = (this.state.filteredOptions != null && this.state.filteredOptions.get(focusedOptionIndex));
         return {...state, focusedOptionIndex, focusedOption}
       })
     } else if(e.key === "ArrowUp") {
       e.preventDefault();
       this.setState(state => {
-        const optionsCount = this.state.filteredOptions?.count() || 0;
+        const optionsCount = (this.state.filteredOptions != null && this.state.filteredOptions.count()) || 0;
         const focusedOptionIndex = (state.focusedOptionIndex - 1 + optionsCount) % optionsCount;
-        const focusedOption = this.state.filteredOptions?.get(focusedOptionIndex);
+        const focusedOption = this.state.filteredOptions != null && this.state.filteredOptions.get(focusedOptionIndex);
         return {...state, focusedOptionIndex, focusedOption}
       })
     } else if(e.key === "Escape") {
@@ -85,10 +85,10 @@ export class DropdownInputMulti extends _Input {
     } else if(e.key === "Delete" || e.key === "Backspace") {
       if(e.target.selectionStart === 0 && e.target.selectionEnd === 0) {
         if(this.props.name != null) {
-          const newData = (this.props.data || Map())?.updateIn(this.props.name.split('.'), data => data.delete(-1));
-          this.props.onUpdate?.(newData);
+          const newData = ((this.props.data != null && this.props.data) || Map()).updateIn(this.props.name.split('.'), data => data.delete(-1));
+          if(this.props.onUpdate != null) { this.props.onUpdate(newData); }
         } else {
-          this.props.onUpdate?.((this.props.data || List()).delete(-1));
+          if(this.props.onUpdate != null) { this.props.onUpdate( (this.props.data || List()).delete(-1) ) }
         }
       }
     } 
@@ -102,24 +102,26 @@ export class DropdownInputMulti extends _Input {
   onSelectOption = (optionToAdd) => {
     const valueToAdd = this.optionToValueTransform(optionToAdd);
     if(this.props.name != null) {
-      const newData = (this.props.data || Map())?.updateIn(this.props.name.split('.'), (data) => {
+      const newData = (this.props.data || Map()).updateIn(this.props.name.split('.'), (data) => {
         return (data || List())
           .filter(value => !DropdownInputMulti.valueIsEqualToValue(this.props, value, valueToAdd))
           .push(valueToAdd);
       });
-      this.props.onUpdate?.(newData);
+      if(this.props.onUpdate != null) { this.props.onUpdate(newData) };
     } else {
-      this.props.onUpdate?.( (this.props.data || List())
-        .filter(value => !DropdownInputMulti.valueIsEqualToValue(this.props, value, valueToAdd))
-        .push(valueToAdd))
+      if(this.props.onUpdate != null) {
+        this.props.onUpdate( (this.props.data || List())
+          .filter(value => !DropdownInputMulti.valueIsEqualToValue(this.props, value, valueToAdd))
+          .push(valueToAdd))
+      }
     }
     this.setState(state => ({...state, inputValue: null}))
   }
 
   onInputChange = (e) => {
     const inputValue = e.target.value;
-    if(this.props.noOptionTransformFromInputValue != null && this.state.filteredOptions?.count() === 0) {
-      const focusedOption = this.props.noOptionTransformFromInputValue?.(inputValue);
+    if(this.props.noOptionTransformFromInputValue != null && this.state.filteredOptions != null && this.state.filteredOptions.count() === 0) {
+      const focusedOption = this.props.noOptionTransformFromInputValue != null && this.props.noOptionTransformFromInputValue(inputValue);
       this.setState(state => ({...state, inputValue, focusedOption, focusedOptionIndex: 0}));
     } else {
       this.setState(state => ({...state, inputValue}));
@@ -131,7 +133,7 @@ export class DropdownInputMulti extends _Input {
   valuesRender = () => {
     const values = DropdownInputMulti.getValues(this.props);
     return <>
-      {values?.map(this.valueRender)}
+      {values && values.map(this.valueRender)}
     </>
   }
 
@@ -145,7 +147,7 @@ export class DropdownInputMulti extends _Input {
 
   onDeleteTag = (valueToDelete) => () => {
     if(this.props.name != null) {
-      const newData = (this.props.data || Map())?.updateIn(this.props.name.split('.'), (data) => {
+      const newData = (this.props.data || Map()).updateIn(this.props.name.split('.'), (data) => {
         return (data || List())
           .filter(option => !DropdownInputMulti.optionIsEqualToValue(this.props, option, valueToDelete))
       });

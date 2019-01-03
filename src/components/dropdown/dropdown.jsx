@@ -9,8 +9,8 @@ class DropdownItem extends React.Component {
     super(props);
     this.elm = React.createRef();
   }
-  onMouseEnter = (option) => () => this.props.onFocusOption?.(option);
-  onMouseDown = (option) => () => this.props.onSelectOption?.(option);
+  onMouseEnter = (option) => () => { if(this.props.onFocusOption != null) { this.props.onFocusOption(option) }; }
+  onMouseDown = (option) => () => { if(this.props.onSelectOption != null) { this.props.onSelectOption(option) }; }
 
   scrollIntoView = () => {
     const current = this.elm.current;
@@ -34,7 +34,7 @@ class DropdownItem extends React.Component {
     })
 
     let value = this.props.data;
-    if(this.props.data?.get && this.props.optionDisplayKey != null) value = this.props.data.get(this.props.optionDisplayKey);
+    if(this.props.data && this.props.data.get && this.props.optionDisplayKey != null) value = this.props.data.get(this.props.optionDisplayKey);
 
     const className = [
       styles.item,
@@ -57,8 +57,8 @@ class DropdownAddItem extends React.Component {
     super(props);
     this.elm = React.createRef();
   }
-  onMouseEnter = (option) => () => this.props.onFocusOption?.(option);
-  onMouseDown = (option) => () => this.props.onSelectOption?.(option);
+  onMouseEnter = (option) => () => { if(this.props.onFocusOption != null) { this.props.onFocusOption(option) } };
+  onMouseDown = (option) => () => { if(this.props.onSelectOption != null) { this.props.onSelectOption(option) } };
 
   render() {
     if(this.props.noOptionRender) return this.props.noOptionRender({
@@ -71,7 +71,7 @@ class DropdownAddItem extends React.Component {
     })
 
     let value = this.props.data;
-    if(this.props.data?.get && this.props.optionDisplayKey != null) value = this.props.data.get(this.props.optionDisplayKey);
+    if(this.props.data != null && this.props.data.get && this.props.optionDisplayKey != null) value = this.props.data.get(this.props.optionDisplayKey);
 
     const className = [
       styles.item,
@@ -95,12 +95,14 @@ export class Dropdown extends React.Component {
     this.focusedElm = React.createRef();
   }
   onFocusOption = (focusedOptionIndex) => (focusedOption) => {
-    this.props.onFocusOption?.(focusedOptionIndex, focusedOption);
+    if( this.props.onFocusOption != null ) { this.props.onFocusOption(focusedOptionIndex, focusedOption) }
   }
 
   componentDidUpdate = (prevProps) => {
     if(prevProps.focusedOptionIndex !== this.props.focusedOptionIndex) {
-      this.focusedElm?.current?.scrollIntoView?.();
+      if( this.focusedElm != null && this.focusedElm.current != null && this.focusedElm.current.scrollIntoView != null ) {
+        this.focusedElm.current.scrollIntoView();
+      }
     }
   }
 
@@ -110,11 +112,11 @@ export class Dropdown extends React.Component {
       maxHeight: this.props.maxHeight,
       ...this.props.style
     })
-    const showNoOptionsItem = this.props.options?.count() === 0 && this.props.noOptionOption;
+    const showNoOptionsItem = (this.props.option != null && this.props.options.count() === 0) && this.props.noOptionOption;
     const isNoOptionFocused = this.props.noOptionOption === this.props.focusedOption;
 
     return <div className={styles.container} style={style}>
-      {this.props.options?.map((option, key) => {
+      {this.props.options && this.props.options.map((option, key) => {
         const focused = option === this.props.focusedOption;
         let Tag = DropdownItem;
         if(this.props.showFirstOption && key === 0)
